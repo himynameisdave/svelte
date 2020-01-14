@@ -1,8 +1,10 @@
 import { is_void } from '../../../utils/names';
+import isContenteditable, { isBindingContenteditable } from '../../utils/contenteditable';
 import { get_attribute_value, get_class_attribute_value } from './shared/get_attribute_value';
 import { get_slot_scope } from './shared/get_slot_scope';
 import { boolean_attributes } from './shared/boolean_attributes';
 import Renderer, { RenderOptions } from '../Renderer';
+import Binding from '../../nodes/Binding';
 import Element from '../../nodes/Element';
 import { x } from 'code-red';
 import Expression from '../../nodes/shared/Expression';
@@ -13,11 +15,7 @@ export default function(node: Element, renderer: Renderer, options: RenderOption
 	// awkward special case
 	let node_contents;
 
-	const contenteditable = (
-		node.name !== 'textarea' &&
-		node.name !== 'input' &&
-		node.attributes.some((attribute) => attribute.name === 'contenteditable')
-	);
+	const contenteditable = isContenteditable(node);
 
 	const slot = node.get_static_attribute_value('slot');
 	const nearest_inline_component = node.find_nearest(/InlineComponent/);
@@ -101,7 +99,7 @@ export default function(node: Element, renderer: Renderer, options: RenderOption
 		}
 	}
 
-	node.bindings.forEach(binding => {
+	node.bindings.forEach((binding: Binding) => {
 		const { name, expression } = binding;
 
 		if (binding.is_readonly) {
@@ -110,7 +108,7 @@ export default function(node: Element, renderer: Renderer, options: RenderOption
 
 		if (name === 'group') {
 			// TODO server-render group bindings
-		} else if (contenteditable && (name === 'textContent' || name === 'innerHTML')) {
+		} else if (contenteditable && isBindingContenteditable(binding)) {
 			node_contents = expression.node;
 
 			// TODO where was this used?
