@@ -16,6 +16,7 @@ import list from '../../utils/list';
 import Let from './Let';
 import TemplateScope from './shared/TemplateScope';
 import { INode } from './interfaces';
+import { isBindingContenteditable, getContenteditableAttr } from '../utils/contenteditable';
 
 const svg = /^(?:altGlyph|altGlyphDef|altGlyphItem|animate|animateColor|animateMotion|animateTransform|circle|clipPath|color-profile|cursor|defs|desc|discard|ellipse|feBlend|feColorMatrix|feComponentTransfer|feComposite|feConvolveMatrix|feDiffuseLighting|feDisplacementMap|feDistantLight|feDropShadow|feFlood|feFuncA|feFuncB|feFuncG|feFuncR|feGaussianBlur|feImage|feMerge|feMergeNode|feMorphology|feOffset|fePointLight|feSpecularLighting|feSpotLight|feTile|feTurbulence|filter|font|font-face|font-face-format|font-face-name|font-face-src|font-face-uri|foreignObject|g|glyph|glyphRef|hatch|hatchpath|hkern|image|line|linearGradient|marker|mask|mesh|meshgradient|meshpatch|meshrow|metadata|missing-glyph|mpath|path|pattern|polygon|polyline|radialGradient|rect|set|solidcolor|stop|svg|switch|symbol|text|textPath|tref|tspan|unknown|use|view|vkern)$/;
 
@@ -634,19 +635,15 @@ export default class Element extends Node {
 					});
 				}
 			} else if (
-				name === 'textContent' ||
-				name === 'innerHTML'
+				isBindingContenteditable(binding)
 			) {
-				const contenteditable = this.attributes.find(
-					(attribute: Attribute) => attribute.name === 'contenteditable'
-				);
-
+				const contenteditable = getContenteditableAttr(this);
 				if (!contenteditable) {
 					component.error(binding, {
 						code: `missing-contenteditable-attribute`,
-						message: `'contenteditable' attribute is required for textContent and innerHTML two-way bindings`
+						message: `'contenteditable' attribute is required for textContent/innerHTML/innerText two-way bindings`
 					});
-				} else if (contenteditable && !contenteditable.is_static) {
+				} else if (!contenteditable.is_static) {
 					component.error(contenteditable, {
 						code: `dynamic-contenteditable-attribute`,
 						message: `'contenteditable' attribute cannot be dynamic if element uses two-way binding`
