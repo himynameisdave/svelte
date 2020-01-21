@@ -5,14 +5,13 @@ import {
 	isInputOrTextarea,
 	isAttrContentEditable,
 	hasContentEditableAttr,
-	isBindingContenteditable,
+	isNameContenteditable,
 	getContenteditableAttr,
 	CONTENTEDITABLE_ATTR,
 	CONTENTEDITABLE_BINDINGS,
 } from './contenteditable';
 import Element from '../nodes/Element';
 import Attribute from '../nodes/Attribute';
-import Binding from '../nodes/Binding';
 
 describe('get_name_from_filename', () => {
 	it('uses the basename', () => {
@@ -86,14 +85,12 @@ describe('contenteditable', () => {
 		});
 	});
 	
-	describe('isBindingContenteditable', () => {
-		it('returns true if binding is a contenteditable type', () => {
-			const binding = { name: CONTENTEDITABLE_BINDINGS[0] } as Binding;
-			assert.equal(isBindingContenteditable(binding), true);
+	describe('isNameContenteditable', () => {
+		it('returns true if name is a contenteditable type', () => {
+			assert.equal(isNameContenteditable(CONTENTEDITABLE_BINDINGS[0]), true);
 		});
-		it('returns false if attribute is not contenteditable type', () => {
-			const binding = { name: 'value' } as Binding;
-			assert.equal(isBindingContenteditable(binding), false);
+		it('returns false if name is not contenteditable type', () => {
+			assert.equal(isNameContenteditable('value'), false);
 		});
 	});
 	

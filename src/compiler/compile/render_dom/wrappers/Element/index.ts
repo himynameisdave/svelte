@@ -26,6 +26,7 @@ import { Identifier } from 'estree';
 import EventHandler from './EventHandler';
 import { extract_names } from 'periscopic';
 import Action from '../../../nodes/Action';
+import { isNameContenteditable, hasContentEditableAttr } from '../../../utils/contenteditable';
 
 const events = [
 	{
@@ -37,8 +38,8 @@ const events = [
 	{
 		event_names: ['input'],
 		filter: (node: Element, name: string) =>
-			(name === 'textContent' || name === 'innerHTML') &&
-			node.attributes.some(attribute => attribute.name === 'contenteditable')
+			isNameContenteditable(name) &&
+			hasContentEditableAttr(node)
 	},
 	{
 		event_names: ['change'],
@@ -601,14 +602,11 @@ export default class ElementWrapper extends Wrapper {
 
 			const should_initialise = (
 				this.node.name === 'select' ||
-				group.bindings.find(binding => {
-					return (
-						binding.node.name === 'indeterminate' ||
-						binding.node.name === 'textContent' ||
-						binding.node.name === 'innerHTML' ||
-						binding.is_readonly_media_attribute()
-					);
-				})
+				group.bindings.find(binding => (
+					binding.node.name === 'indeterminate' ||
+					isNameContenteditable(binding.node.name) ||
+					binding.is_readonly_media_attribute()
+				))
 			);
 
 			if (should_initialise) {
